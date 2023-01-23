@@ -4,8 +4,7 @@ import scipy.signal as signal
 from PIL import Image
 from tqdm import tqdm
 
-from python.utils import endpoint_error, angular_error, norm_error
-
+from python.error import endpoint_error, angular_error
 
 def gradHorn(I1,I2):
 
@@ -43,8 +42,6 @@ def gradHorn(I1,I2):
     It = 0.25 * (It1 - It2)
 
     return Ix, Iy, It
-
-
 
 def horn(I1,I2,alpha, N):
 
@@ -85,19 +82,22 @@ def optimize_horn(I1, I2, wgt, min_alpha=1, max_alpha=1501, step=100, N=150):
 
     best_epe = float('inf')
     epe = []
+    epe_std = []
     best_ang = float('inf')
+    ang_std = []
     ang = []
-    best_norm = float('inf')
-    norm = []
     best_alpha=[min_alpha for i in range(3)]
     alphas = [i for i in range(1, max_alpha-min_alpha, step)] 
     
-    for alpha in tqdm(alphas):
+    for alpha in alphas:
         wobs = horn(I1, I2, alpha, N)
         # register errors
-        epe.append( endpoint_error(wobs, wgt)[0] )
-        ang.append( angular_error(wobs, wgt)[0] )
-        norm.append( norm_error(wobs, wgt) )
+        e1 = endpoint_error(wobs, wgt)
+        e2 = angular_error(wobs, wgt)
+        epe.append( e1[0] )
+        ang.append( e2[0] )
+        epe_std.append( e1[1] )
+        ang_std.append( e2[1] )
         # select the best alphas
         if epe[-1] < best_epe:
             best_epe = epe[-1]
@@ -105,13 +105,5 @@ def optimize_horn(I1, I2, wgt, min_alpha=1, max_alpha=1501, step=100, N=150):
         if ang[-1] < best_ang:
             best_ang = ang[-1]
             best_alpha[1] = alpha
-        if norm[-1] < best_norm:
-            best_norm = norm[-1]
-            best_alpha[2] = alpha
-
-    return alphas, best_alpha, epe, best_epe, ang, best_ang, norm, best_norm
-
-
-
-
-    
+       
+    return alphas, best_alpha, epe, best_epe, ang, best_ang, epe_std, ang_std

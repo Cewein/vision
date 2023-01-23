@@ -2,8 +2,7 @@ import numpy as np
 import scipy.signal as signal
 
 from tqdm import tqdm
-
-from python.utils import endpoint_error, angular_error, norm_error
+from python.error import endpoint_error, angular_error
 
 def gradHorn(I1,I2):
 
@@ -69,8 +68,37 @@ def lucasKanade(I1,I2, winSize = 5):
             w[x, y] = np.linalg.lstsq(A, B, rcond=None)[0]
     return w
 
+def lucasKanadeBartlett(I1,I2, winSize = 5):
+    Ix, Iy, It = gradHorn(I1,I2)
 
-def optimize_LK(I1, I2, wgt, min_win=1, max_win=21, step=1):
+    bartlettWindow = np.bartlett(winSize)
+    border = np.int_(winSize/2)
+    width,heigth = np.array(I1).shape
+    w = np.zeros((width,heigth,2))
+
+    for x in range(border, width-border):
+        for y in range(border, heigth-border):
+
+            A = np.zeros((winSize*winSize,2))
+            B = np.zeros((winSize*winSize))
+
+            try:
+                A[:, 0] = (Ix[x-border:x+border+1, y-border:y+border+1]*bartlettWindow).flatten()
+                A[:, 1] = (Iy[x-border:x+border+1, y-border:y+border+1]*bartlettWindow).flatten()
+
+                B = -(It[x-border:x+border+1, y-border:y+border+1]*bartlettWindow).flatten()
+            except:
+                A[:, 0] = (Ix[x-border:x+border, y-border:y+border]*bartlettWindow).flatten()
+                A[:, 1] = (Iy[x-border:x+border, y-border:y+border]*bartlettWindow).flatten()
+
+                B = -(It[x-border:x+border, y-border:y+border]*bartlettWindow).flatten()
+
+
+            w[x, y] = np.linalg.lstsq(A, B, rcond=None)[0]
+    return w
+
+
+def optimize_LK(func, I1, I2, wgt, min_win=1, max_win=21, step=1):
     '''returns the parameters for which the method give the best result,
     wrt. ground truth.'''
 
@@ -84,11 +112,11 @@ def optimize_LK(I1, I2, wgt, min_win=1, max_win=21, step=1):
     wins = [i for i in range(min_win, max_win, step)] 
     
     for alpha in tqdm(wins):
-        wobs = lucasKanade(I1, I2, alpha)
+        wobs = func(I1, I2, alpha)
         # register errors
         epe.append( endpoint_error(wobs, wgt)[0] )
         ang.append( angular_error(wobs, wgt)[0] )
-        norm.append( norm_error(wobs, wgt) )
+
         # select the best wins
         if epe[-1] < best_epe:
             best_epe = epe[-1]
@@ -96,9 +124,6 @@ def optimize_LK(I1, I2, wgt, min_win=1, max_win=21, step=1):
         if ang[-1] < best_ang:
             best_ang = ang[-1]
             best_win[1] = alpha
-        if norm[-1] < best_norm:
-            best_norm = norm[-1]
-            best_win[2] = alpha
 
     return wins, best_win, epe, best_epe, ang, best_ang, norm, best_norm
 

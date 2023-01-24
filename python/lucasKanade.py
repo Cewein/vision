@@ -94,7 +94,7 @@ def lucasKanadeBartlett(I1,I2, winSize = 5):
                 B = -(It[x-border:x+border, y-border:y+border]*bartlettWindow).flatten()
 
 
-            w[x, y] = np.linalg.lstsq(A, B, rcond=None)[0]
+            w[x, y] = np.linalg.lstsq(A, B, rcond=0.0001)[0]
     return w
 
 
@@ -104,18 +104,22 @@ def optimize_LK(func, I1, I2, wgt, min_win=1, max_win=21, step=1):
 
     best_epe = float('inf')
     epe = []
+    epe_std = []
     best_ang = float('inf')
     ang = []
-    best_norm = float('inf')
-    norm = []
+    ang_std = []
     best_win=[min_win for i in range(3)]
     wins = [i for i in range(min_win, max_win, step)] 
     
     for alpha in tqdm(wins):
         wobs = func(I1, I2, alpha)
         # register errors
-        epe.append( endpoint_error(wobs, wgt)[0] )
-        ang.append( angular_error(wobs, wgt)[0] )
+        e1 = endpoint_error(wobs, wgt)
+        e2 = angular_error(wobs, wgt)
+        epe.append( e1[0] )
+        ang.append( e2[0] )
+        epe_std.append( e1[1] )
+        ang_std.append( e2[1] )
 
         # select the best wins
         if epe[-1] < best_epe:
@@ -125,5 +129,5 @@ def optimize_LK(func, I1, I2, wgt, min_win=1, max_win=21, step=1):
             best_ang = ang[-1]
             best_win[1] = alpha
 
-    return wins, best_win, epe, best_epe, ang, best_ang, norm, best_norm
+    return wins, best_win, epe, best_epe, ang, best_ang, epe_std, ang_std
 

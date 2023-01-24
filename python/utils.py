@@ -41,8 +41,10 @@ def plot_all_horn():
         w_ang =  horn(I1, I2, alpha=best_alphas[1], N=300)
         # plots
 
-        ax[i,0].plot(alphas, ang, label='std : '+str(np.array(ang_std).mean()), alpha=0.8, color=mycolors[3], linewidth=3)
-        ax[i,1].plot(alphas, epe, label='std : '+str(np.array(epe_std).mean()), alpha=0.8, color=mycolors[4], linewidth=3)
+        ax[i,0].plot(alphas, ang, label='log std : '+str(np.log(ang_std).mean()), alpha=0.8, color=mycolors[3], linewidth=3)
+        ax[i,0].fill_between(alphas, np.array(ang)+np.log(ang_std), np.array(ang)-np.log(ang_std), facecolor='C0', alpha=0.4)
+        ax[i,1].plot(alphas, epe, label='log std : '+str(np.log(epe_std).mean()), alpha=0.8, color=mycolors[4], linewidth=3)
+        ax[i,1].fill_between(alphas, np.array(epe)+np.log(epe_std), np.array(epe)-np.log(epe_std), facecolor='C0', alpha=0.4)
         ax[i,0].legend()
         ax[i,1].legend()
         ax[i,2].imshow(computeColor(w_ang))
@@ -96,8 +98,10 @@ def plot_all_LK(func):
         angArray[~np.isfinite(angArray)] = 0.0
         epeArray[~np.isfinite(epeArray)] = 0.0
 
-        ax[i,0].plot(alphas, ang, alpha=0.8, color=mycolors[3], linewidth=3)
-        ax[i,1].plot(alphas, epe, alpha=0.8, color=mycolors[4], linewidth=3)
+        ax[i,0].plot(alphas, ang, label='log std : '+str(np.log(ang_std).mean()), alpha=0.8, color=mycolors[3], linewidth=3)
+        ax[i,0].fill_between(alphas, np.array(ang)+np.log(ang_std), np.array(ang)-np.log(ang_std), facecolor='C0', alpha=0.4)
+        ax[i,1].plot(alphas, epe, label='log std : '+str(np.log(epe_std).mean()), alpha=0.8, color=mycolors[4], linewidth=3)
+        ax[i,1].fill_between(alphas, np.array(epe)+np.log(epe_std), np.array(epe)-np.log(epe_std), facecolor='C0', alpha=0.4)
         ax[i,2].imshow(computeColor(w_ang))
         ax[i,3].imshow(computeColor(w_epe))
         ax[i,4].quiver(np.arange(0, w_epe.shape[1], 5), np.arange(w_epe.shape[0], 0, -5), w_epe[::5, ::5, 0], -w_epe[::5, ::5, 1])

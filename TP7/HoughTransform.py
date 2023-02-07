@@ -195,7 +195,9 @@ while(1):
 		elif k == ord('s'):
 				cv2.imwrite('Q4_Frame_%04d.png'%cpt,frame_tracked)
 				cv2.imwrite('Q4_Frame_Hough_%04d.png'%cpt,hough_transform)
-				cv2.imwrite('Q4_Frame_Ori_%04d.png'%cpt,ori)
+				cv2.imwrite('Q4_Frame_Valide_orientation_%04d.png'%cpt,ori)
+				cv2.imwrite('Q4_Frame_gradient_%04d.png'%cpt,gradient)
+				cv2.imwrite('Q4_Frame_orientation_%04d.png'%cpt,orientation)
 		cpt += 1
 	else:
 		break

@@ -191,9 +191,9 @@ while(1):
 		if k == 27:
 				break
 		elif k == ord('s'):
-				cv2.imwrite('./images/Q5_Frame_%04d.png'%cpt,frame_tracked)
-				cv2.imwrite('./images/Q5_Frame_tHough_%04d.png'%cpt,hough_transform)
-				cv2.imwrite('./images/Q5_Frame_Ori_%04d.png'%cpt,ori)
+				cv2.imwrite('Q5_Frame_%04d.png'%cpt,frame_tracked)
+				cv2.imwrite('Q5_Frame_T_Hough_%04d.png'%cpt,hough_transform)
+				cv2.imwrite('Q5_Frame_Ori_%04d.png'%cpt,ori)
 		cpt += 1
 	else:
 		break

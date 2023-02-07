@@ -20,7 +20,7 @@ def define_ROI(event, x, y, flags, param):
 		c = min(c,c2)  
 		roi_defined = True
 
-cap = cv2.VideoCapture('video\VOT-Woman.mp4')
+cap = cv2.VideoCapture('video\Antoine_Mug.mp4')
 
 # take first frame of the video
 ret,frame = cap.read()
@@ -68,6 +68,13 @@ while(1):
     ret ,frame = cap.read()
     if ret == True:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        hsvDisp = hsv
+        hsvDisp[:,:,1] = 255
+        hsvDisp[:,:,2] = 255
+
+        hueDisp = cv2.cvtColor(hsvDisp, cv2.COLOR_HSV2BGR)
+
 		# Backproject the model histogram roi_hist onto the 
 		# current image hsv, i.e. dst(x,y) = roi_hist(hsv(0,x,y))
         dst = cv2.calcBackProject([hsv],[0],roi_hist,[0,180],1)
@@ -78,13 +85,19 @@ while(1):
         # Draw a blue rectangle on the current image
         r,c,h,w = track_window
         frame_tracked = cv2.rectangle(frame, (r,c), (r+h,c+w), (255,0,0) ,2)
+
+        #windows to display
         cv2.imshow('Sequence',frame_tracked)
+        cv2.imshow('Hue', hueDisp)
+        cv2.imshow('Retroprojection', dst)
 
         k = cv2.waitKey(60) & 0xff
         if k == 27:
             break
         elif k == ord('s'):
             cv2.imwrite('Frame_%04d.png'%cpt,frame_tracked)
+            cv2.imwrite('Frame_hue_%04d.png'%cpt,hueDisp)
+            cv2.imwrite('Frame_repro_%04d.png'%cpt,dst)
         cpt += 1
     else:
         break
